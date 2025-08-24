@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Menu, X, MapPin } from "lucide-react";
 import { Orbitron } from "next/font/google";
@@ -18,10 +18,22 @@ export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [playbackRate, setPlaybackRate] = useState(1);
+  const heroVideoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
+    const vid = heroVideoRef.current;
+    if (vid) {
+      const handleLoaded = () => {
+        vid.currentTime = 2; // ⏩ Skip first 2s
+      };
+      vid.addEventListener("loadedmetadata", handleLoaded);
+
+      return () => vid.removeEventListener("loadedmetadata", handleLoaded);
+    }
+  }, []);
+  useEffect(() => {
     const timers = [
-      setTimeout(() => setPlaybackRate(10), 500),
+      setTimeout(() => setPlaybackRate(10), 200),
       setTimeout(() => setPlaybackRate(16), 1000),
       setTimeout(() => setLoading(false), 1500),
     ];
@@ -87,6 +99,7 @@ export default function Home() {
       {/* HERO SECTION */}
       <section className="relative h-screen w-full flex flex-col">
         <video
+          ref={heroVideoRef}
           autoPlay
           loop
           muted
